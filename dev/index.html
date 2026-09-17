@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>抖音自动点赞 - 开发模拟页</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f1015;
+      --panel: #1a1c23;
+      --panel-2: #242733;
+      --text: #f4f4f5;
+      --muted: #9ca3af;
+      --brand: #fe2c55;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% -20%, #2c1020 0, var(--bg) 44%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+    }
+
+    main {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 56px 0 80px;
+    }
+
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    .subtitle { margin: 0 0 28px; color: var(--muted); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      padding: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      background: rgba(26, 28, 35, 0.92);
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+    }
+
+    .card h2 { margin: 0 0 14px; font-size: 16px; }
+
+    .like-button {
+      display: grid;
+      width: 100%;
+      min-height: 150px;
+      place-items: center;
+      border: 1px solid rgba(254, 44, 85, 0.45);
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(254, 44, 85, 0.24), rgba(255, 122, 69, 0.14));
+      color: #fff;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: default;
+      user-select: none;
+    }
+
+    .counter {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .counter strong { color: var(--brand); font-size: 22px; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    button {
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--text);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button:hover { background: rgba(255, 255, 255, 0.13); }
+    button.primary { border-color: transparent; background: linear-gradient(135deg, #fe2c55, #ff7a45); font-weight: 700; }
+
+    pre {
+      min-height: 180px;
+      max-height: 300px;
+      margin: 0;
+      padding: 12px;
+      overflow: auto;
+      border-radius: 10px;
+      background: #0c0d11;
+      color: #a7f3d0;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .hint { margin-top: 14px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>抖音自动点赞 · 开发模拟页</h1>
+    <p class="subtitle">这个页面会监听脚本派发的 Z 键事件，并自动触发一次 Ctrl+Shift+Z 来演示自动点赞流程。</p>
+
+    <div class="grid">
+      <section class="card">
+        <h2>模拟点赞区域</h2>
+        <div class="like-button" id="likeArea">Z 键点赞</div>
+        <p class="counter">已模拟点赞 <strong id="likeCount">0</strong> 次</p>
+      </section>
+
+      <section class="card">
+        <h2>开发控制台</h2>
+        <div class="actions">
+          <button class="primary" id="toggleButton" type="button">Ctrl+Shift+Z 开启 / 暂停</button>
+          <button id="stopButton" type="button">Ctrl+Shift+X 停止</button>
+          <button id="resetButton" type="button">清空计数</button>
+        </div>
+        <pre id="log">等待脚本加载...</pre>
+        <p class="hint" id="hint">脚本加载后可在右下角看到 Z 小圆点；点击展开可以查看按钮和状态。</p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var likeCount = 0;
+      var maxLogs = 30;
+      var logElement = document.getElementById('log');
+      var countElement = document.getElementById('likeCount');
+      var hintElement = document.getElementById('hint');
+
+      function writeLog(message) {
+        var time = new Date().toLocaleTimeString();
+        var line = '[' + time + '] ' + message;
+        var lines = logElement.textContent.split('\n');
+        lines.push(line);
+        if (lines.length > maxLogs) lines = lines.slice(lines.length - maxLogs);
+        logElement.textContent = lines.join('\n');
+        logElement.scrollTop = logElement.scrollHeight;
+      }
+
+      function renderCount() {
+        countElement.textContent = String(likeCount);
+      }
+
+      function dispatchShortcut(key, ctrlKey, shiftKey) {
+        document.dispatchEvent(new KeyboardEvent('keydown', {
+          key: key,
+          code: 'Key' + key.toUpperCase(),
+          ctrlKey: ctrlKey,
+          shiftKey: shiftKey,
+          bubbles: true,
+          cancelable: true,
+          composed: true,
+        }));
+      }
+
+      document.addEventListener('keydown', function (event) {
+        if (!event.key || event.key.toLowerCase() !== 'z') return;
+        if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) return;
+        likeCount += 1;
+        renderCount();
+        writeLog('捕获到脚本派发的 Z 键，模拟点赞 +1');
+      });
+
+      document.getElementById('toggleButton').addEventListener('click', function () {
+        dispatchShortcut('z', true, true);
+        writeLog('手动触发 Ctrl+Shift+Z');
+      });
+
+      document.getElementById('stopButton').addEventListener('click', function () {
+        dispatchShortcut('x', true, true);
+        writeLog('手动触发 Ctrl+Shift+X');
+      });
+
+      document.getElementById('resetButton').addEventListener('click', function () {
+        likeCount = 0;
+        renderCount();
+        logElement.textContent = '计数已清空。';
+      });
+
+      // 开发模式默认自动触发一次脚本快捷键，方便直接观察自动模拟效果。
+      // 访问 http://127.0.0.1:4173/?auto=0 可以关闭自动模拟。
+      var autoStart = new URLSearchParams(location.search).get('auto') !== '0';
+      if (autoStart) {
+        window.addEventListener('load', function () {
+          window.setTimeout(function () {
+            dispatchShortcut('z', true, true);
+            writeLog('开发模式：已自动触发 Ctrl+Shift+Z');
+            hintElement.textContent = '自动模拟已启动，正常情况下计数会持续增加。';
+          }, 800);
+        });
+      } else {
+        hintElement.textContent = '自动模拟已关闭，可以手动点击按钮或使用悬浮窗。';
+      }
+
+      // 源码变化后由 dev server 通过 SSE 通知页面自动刷新。
+      if (window.EventSource) {
+        var events = new EventSource('/__dev/events');
+        events.onmessage = function (event) {
+          if (event.data === 'reload') window.location.reload();
+        };
+      }
+    })();
+  </script>
+  <script src="/index.js"></script>
+</body>
+</html>

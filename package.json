@@ -1,0 +1,19 @@
+{
+  "name": "douyin-auto-like",
+  "version": "2.2.0",
+  "private": true,
+  "description": "抖音自动点赞 Userscript：开发环境 + 构建脚本",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:open": "node scripts/dev.mjs --open",
+    "build": "node scripts/build.mjs",
+    "build:watch": "node scripts/build.mjs --watch",
+    "package": "node scripts/build.mjs && node scripts/package.mjs",
+    "check": "node --check index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "pnpm@11.7.0"
+}
