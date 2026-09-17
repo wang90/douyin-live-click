@@ -35,7 +35,7 @@
 3. 把项目根目录下 `index.js` 的全部内容复制粘贴进去；也可以直接使用 `release/douyin-auto-like.user.js`。
 4. 保存后打开抖音页面，右下角会出现 `Z` 小圆点。
 5. 点击圆点展开面板，点击 **开始**。
-6. 如果需要完整包，可下载 `release/douyin-auto-like-v2.2.0.zip`。
+6. 如果需要完整包，可下载 `release/douyin-auto-like-v2.3.0.zip`。
 
 > `index.js` 是构建产物，不要直接修改；请改 `src/` 下的源码后执行 `pnpm run build`。
 
@@ -149,10 +149,10 @@ pnpm run package
 ```text
 release/
 ├── douyin-auto-like.user.js
-└── douyin-auto-like-v2.2.0.zip
+└── douyin-auto-like-v2.3.0.zip
 ```
 
-其中 `.user.js` 可以直接拖进 Tampermonkey，`.zip` 是包含用户脚本和 README 的完整包。
+其中 `.user.js` 可以直接拖进 Tampermonkey，`.zip` 是包含用户脚本、README 和截图的完整包。
 
 ## 项目结构
 
@@ -172,6 +172,7 @@ release/
 │       └── bundler.mjs            # 轻量源码打包器
 ├── src/
 │   ├── userscript.meta.txt        # 油猴脚本头
+│   ├── userscript.config.json     # 匹配域名配置（默认 https://www.douyin.com/*）
 │   ├── config.js                  # 配置与工具函数
 │   ├── auto-like-controller.js    # 自动点赞业务逻辑
 │   ├── floating-widget.js         # 悬浮窗 UI（拖拽、展开/收起、自动贴边、主题）
@@ -229,13 +230,24 @@ pnpm run build
 ## 注意事项
 
 - 脚本通过派发标准 `KeyboardEvent` 模拟按键，部分网站可能会检测 `event.isTrusted` 或自行实现按键逻辑，这种情况下脚本可能无法生效。
-- 当前默认匹配所有网站（`*://*/*`）。如果只希望在抖音运行，可修改 `src/userscript.meta.txt`：
+- 默认匹配域名是：
+
   ```text
-  // @match        *://*.douyin.com/*
-  // @match        *://douyin.com/*
-  // @match        *://*.iesdouyin.com/*
+  https://www.douyin.com/*
   ```
-  修改后执行 `pnpm run build`。
+
+  可以在 `src/userscript.config.json` 中自定义，支持多个 `@match`：
+
+  ```json
+  {
+    "matchPatterns": [
+      "https://www.douyin.com/*",
+      "https://live.douyin.com/*"
+    ]
+  }
+  ```
+
+  修改后执行 `pnpm run build` 或 `pnpm run package`，脚本头会自动生成多个 `@match`。
 - 自动点赞属于自动化操作，可能违反部分平台的使用条款，存在账号被限制或封禁的风险。请自行判断并在合规场景下使用。
 - 本项目仅用于学习和自动化测试场景，使用者需自行承担相应风险。
 

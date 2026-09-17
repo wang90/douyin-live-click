@@ -8,7 +8,25 @@ export const ROOT_DIR = resolve(__dirname, '..', '..');
 export const SRC_DIR = resolve(ROOT_DIR, 'src');
 export const ENTRY_FILE = resolve(SRC_DIR, 'main.js');
 export const META_FILE = resolve(SRC_DIR, 'userscript.meta.txt');
+export const USERSCRIPT_CONFIG_FILE = resolve(SRC_DIR, 'userscript.config.json');
 export const OUTPUT_FILE = resolve(ROOT_DIR, 'index.js');
+
+const DEFAULT_MATCH_PATTERNS = ['https://www.douyin.com/*'];
+
+function readMatchPatterns() {
+    try {
+        const config = JSON.parse(readFileSync(USERSCRIPT_CONFIG_FILE, 'utf8'));
+        if (Array.isArray(config.matchPatterns)) {
+            const patterns = config.matchPatterns
+                .map((pattern) => String(pattern).trim())
+                .filter(Boolean);
+            if (patterns.length > 0) return patterns;
+        }
+    } catch (error) {
+        // 配置文件不存在或格式错误时，回退到抖音默认域名。
+    }
+    return DEFAULT_MATCH_PATTERNS;
+}
 
 // 只处理单行 import，适合当前这种轻量 Userscript 项目。
 // 这样不需要引入 esbuild/rollup，pnpm run build 可以直接工作。
@@ -64,7 +82,12 @@ export function bundleUserscript() {
     const modules = [];
     collectModules(ENTRY_FILE, modules, new Set(), new Set());
 
-    const metadata = readFileSync(META_FILE, 'utf8').trim();
+    const matchLines = readMatchPatterns()
+        .map((pattern) => `// @match        ${pattern}`)
+        .join('\n');
+    const metadata = readFileSync(META_FILE, 'utf8')
+        .replace('__MATCH_PATTERNS__', matchLines)
+        .trim();
     const body = modules.join('\n\n');
 
     return `${metadata}\n\n(function () {\n    'use strict';\n${indent(body, 4)}\n})();\n`;

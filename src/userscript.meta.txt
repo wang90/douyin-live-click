@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         抖音自动点赞 - Z键连发
 // @namespace    https://github.com/wang90/douyin-live-click
-// @version      2.2.0
+// @version      2.3.0
 // @description  自动模拟 Z 键点赞。悬浮窗可拖拽、可展开/收起，闲置后自动贴边收起；支持跟随系统 / 浅色 / 深色主题与快捷键控制。
 // @author       You
-// @match        *://*/*
+__MATCH_PATTERNS__
 // @run-at       document-idle
 // @noframes
 // @grant        none
