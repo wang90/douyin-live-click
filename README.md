@@ -39,6 +39,31 @@
 
 > `index.js` 是构建产物，不要直接修改；请改 `src/` 下的源码后执行 `pnpm run build`。
 
+## 一键导入 Tampermonkey
+
+项目内置了一个本地安装服务，会重新构建脚本，并自动打开 Tampermonkey 安装确认页：
+
+```bash
+pnpm run userscript:install
+```
+
+执行流程：
+
+1. 重新构建最新的 `index.js`。
+2. 启动本地 HTTP 服务，提供 `douyin-auto-like.user.js`。
+3. 自动打开默认浏览器并访问安装地址。
+4. Tampermonkey 弹出安装页面后，点击“安装”即可导入。
+
+可用参数：
+
+```bash
+pnpm run userscript:install -- --no-open   # 只启动服务，不打开浏览器
+pnpm run userscript:install -- --keep      # 保持服务运行
+pnpm run userscript:install -- --port 4180 # 指定本地端口
+```
+
+> 受浏览器安全限制，脚本只能自动打开安装确认页，最终仍需在 Tampermonkey 中点击一次“安装”。
+
 ## 开发环境
 
 ### 环境要求
@@ -141,6 +166,7 @@ release/
 ├── scripts/
 │   ├── build.mjs                  # pnpm run build / build:watch
 │   ├── dev.mjs                    # pnpm run dev
+│   ├── import-userscript.mjs      # pnpm run userscript:install
 │   ├── package.mjs                # pnpm run package
 │   └── lib/
 │       └── bundler.mjs            # 轻量源码打包器
